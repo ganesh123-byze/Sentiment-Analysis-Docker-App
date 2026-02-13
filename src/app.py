@@ -3,19 +3,19 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-
 from pathlib import Path
+
 from src.predict import SentimentPredictor
 
 
 # -----------------------------
-# Create FastAPI App
+# Initialize FastAPI
 # -----------------------------
 app = FastAPI(title="Sentiment Analysis API")
 
 
 # -----------------------------
-# Enable CORS (for development)
+# Enable CORS
 # -----------------------------
 app.add_middleware(
     CORSMiddleware,
@@ -27,13 +27,13 @@ app.add_middleware(
 
 
 # -----------------------------
-# Load Model Once
+# Load ML Model Once
 # -----------------------------
 predictor = SentimentPredictor()
 
 
 # -----------------------------
-# Handle Frontend Path Properly
+# Handle Frontend Path
 # -----------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = BASE_DIR / "frontend"
@@ -49,18 +49,16 @@ class TextInput(BaseModel):
 
 
 # -----------------------------
-# Routes
+# Serve UI at Root URL
 # -----------------------------
 @app.get("/")
-def home():
-    return {"message": "Sentiment Analysis API is running"}
-
-
-@app.get("/ui")
 def serve_ui():
     return FileResponse(FRONTEND_DIR / "index.html")
 
 
+# -----------------------------
+# Prediction Endpoint
+# -----------------------------
 @app.post("/predict")
 def predict_sentiment(input_data: TextInput):
     sentiment = predictor.predict(input_data.text)
